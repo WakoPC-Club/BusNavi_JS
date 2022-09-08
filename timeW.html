@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="UTF-8">
+<meta http-equiv="Refresh content=" 10;***>
+
+<head>
+  <link rel="stylesheet" href="style.css">
+  <title>若葉台_時刻表</title>
+  <script type="text/javascript">
+
+    setTimeout("location.href='timeT.html'", 1000 * 10);
+
+    var Nowdate = new Date();
+    var NowHour = Nowdate.getHours();
+    var NowMin = Nowdate.getMinutes();
+    var NowSec = Nowdate.getSeconds();
+    var NowDay = Nowdate.getDay();
+    var Week = new Array("日", "月", "火", "水", "木", "金", "土");
+    const Display_time = NowHour * 60 + NowMin;//ディスプレイに表示している時間
+    const grace = 1;//何分後以降に出発するバスを表示する
+
+  </script>
+</head>
+
+<h1 crass=houmen>若葉台方面　真光寺経由</h1>
+
+<p class="watch">
+  <script>
+    document.writeln(Nowdate.getFullYear().toString() + "年" + (Nowdate.getMonth() + 1).toString() + "月" + Nowdate.getDate().toString() + "日(" + Week[NowDay] + ")" + NowHour + ":" + ('00' + NowMin).slice(-2));
+  </script>
+</p>
+
+<script>
+  //経由
+  const busrouteMap = {
+    00: '本日の運行は終了しました',
+    21: '[鶴21] 若葉台駅　真光寺経由',
+    22: '[鶴22] 調布駅南口　若葉台駅経由',
+    99: ''
+  };
+
+  //混雑度
+  const congestionStatusMap = {
+    11: 'あんまり',
+    12: 'そこそこ',
+    13: 'かなり',
+    99: '',
+  };
+
+  // 時刻表
+  var ary_timetable =
+  [
+    [ //平日
+      [],//0
+      [],//1
+      [],//2
+      [],//3
+      [],//4
+      [],//5
+      [[10,21,11],[30,21,11],[50,21,11]],//6
+      [[11,21,11],[26,21,11],[42,21,11],[51,21,11]],//7
+      [[01,21,11],[11,21,11],[26,21,11],[51,21,11]],//8
+      [[30,21,11]],//9
+      [[10,21,11],[50,21,11]],//10
+      [[30,21,11]],//11
+      [[10,21,11],[50,21,11]],//12
+      [[23,21,11]],//13
+      [[03,21,11],[24,21,11],[44,21,11]],//14
+      [[03,21,11],[24,21,11],[44,21,11]],//15
+      [[03,21,11],[24,21,11],[44,21,11]],//16
+      [[14,21,11],[34,21,11],[54,21,11]],//17
+      [[14,21,11],[34,21,11],[54,21,11]],//18
+      [[20,21,11],[33,21,11],[53,21,11]],//19
+      [[20,21,11],[35,21,11]],//20
+      [[13,21,11],[51,21,11]],//21
+      [],//22
+      []//23
+    ],
+
+    [//土曜
+      [],//0
+      [],//1
+      [],//2
+      [],//3
+      [],//4
+      [],//5
+      [[40,21,11]],//6
+      [[14,21,11],[32,21,11],[53,22,11]],//7
+      [[29,21,11]],//8
+      [[05,21,11],[46,21,11]],//9
+      [[29,21,11]],//10
+      [[09,21,11],[49,21,11]],//11
+      [[39,21,11]],//12
+      [[09,21,11],[49,21,11]],//13
+      [[29,21,11]],//14
+      [[09,21,11],[52,21,11]],//15
+      [[32,21,11]],//16
+      [[12,21,11],[42,21,11]],//17
+      [[30,21,11]],//18
+      [[04,21,11],[53,21,11]],//19
+      [[30,21,11]],//20
+      [[12,21,11],[54,21,11]],//21
+      [],//22
+      []//23
+    ],
+    [//日曜
+      [],//0
+      [],//1
+      [],//2
+      [],//3
+      [],//4
+      [],//5
+      [[40,21,11]],//6
+      [[11,21,11]],//7
+      [[03,21,11],[29,21,11]],//8
+      [[08,21,11],[46,21,11]],//9
+      [[29,21,11]],//10
+      [[09,21,11],[49,21,11]],//11
+      [[39,21,11]],//12
+      [[09,21,11],[49,21,11]],//13
+      [[29,21,11]],//14
+      [[09,21,11],[52,21,11]],//15
+      [[32,21,11]],//16
+      [[12,21,11],[42,21,11]],//17
+      [[30,21,11]],//18
+      [[04,21,11],[53,21,11]],//19
+      [[30,21,11]],//20
+      [[12,21,11],[54,21,11]],//21
+      [],//22
+      []//23
+    ]
+  ];
+
+
+  var show = new Array(99, 99, 99, 99, 99, 99);
+  var via = new Array(99, 99, 99, 99, 99, 99);
+  var congestion = new Array(99, 99, 99, 99, 99, 99);
+  var time_left = new Array(' ', ' ', ' ', ' ', ' ', ' ');
+
+  var cc = 0;
+  var columnsNumber = 6;
+  var weekday_mode;
+
+  if (NowDay === 0)
+  {
+    weekday_mode = 2;
+  }
+  else if (NowDay === 6)
+  {
+    weekday_mode = 1;
+  }
+  else
+  {
+    weekday_mode = 0;
+  }
+
+  var ary_hour_timetable = ary_timetable[weekday_mode][NowHour];//配列,現在Hのバス時刻表全取得
+
+  for (i = 0; true; i++) {
+    if (NowHour === 24)//24時に達した際のエスケープ
+    {
+      if (cc === 0) {
+        via[0] = 00;
+      }
+
+      break;
+    }
+
+    if (ary_hour_timetable.length !== 0)//空配列のエスケープ
+    {
+      if (ary_hour_timetable.length === i) // OutOfLengthのエスケープ
+      {
+        NowHour++;
+        NowMin = 0 - grace;
+
+        ary_hour_timetable = ary_timetable[weekday_mode][NowHour];
+
+        i = -1;
+      }
+
+      else if (NowMin + grace <= ary_hour_timetable[i][0])//Show処理
+      {
+        var Sd = ary_hour_timetable[i][0];
+
+        show[cc] = NowHour + ":" + ('00' + Sd).slice(-2);//Show
+        via[cc] = ary_hour_timetable[i][1];//Show
+        congestion[cc] = ary_hour_timetable[i][2];//Show
+        time_left[cc] = ((NowHour * 60 + Sd) - Display_time).toString() + '分';
+
+        cc++;
+      }
+
+    }
+
+    else {
+      NowHour++;
+      NowMin = 0 - grace;
+      ary_hour_timetable = ary_timetable[weekday_mode][NowHour];
+      i--;
+    }
+
+    if (cc === columnsNumber) break;
+
+  }
+
+
+  //時刻
+  for (i = 0; i < show.length; i++) {
+    switch (show[i]) {
+      case 99:
+        show[i] = "--:--"
+        break;
+
+    }
+  }
+
+  myTbl3 = new Array
+    (
+      "若葉台駅",
+      "若葉台駅",
+      "若葉台駅",
+      "若葉台駅",
+      "若葉台駅",
+      "若葉台駅"
+    );
+
+
+  myTbl3 = congestion.map((value) => { return congestionStatusMap[value] });
+  via = via.map((value) => { return busrouteMap[value] });
+
+//-->
+</script>
+
+<body>
+  <div>
+
+    <table border="2" cellspacing="5" align="center">
+      <tr>
+        <th>出発時間</th>
+        <th>行き先</th>
+        <th>出発まで</th>
+
+        <script type="text/javascript">
+
+          for (i = 0; i < columnsNumber; i++) {
+            document.write(`<tr class='WakabadaiTable'> <td class='time'> ${show[i]} </td>`);//出発時間
+            document.write(`<td class='keiyu'> ${via[i]} </td>`);//行先（経由）
+            document.write(`<td class='nokori'> ${time_left[i]} </td>`);//出発時間まで
+          }
+
+      //-->
+        </script>
+
+      </tr>
+    </table>
+
+    <aside class=left>
+      <p>
+        <img src="koukoku_left.png" alt="左広告">
+      </p>
+    </aside>
+
+    <aside class=right>
+      <p>
+        <img src="koukoku_right.png" alt="右広告">
+      </p>
+    </aside>
+
+
+
+  </div>
+
+</body>
+<br>
+
+</html>
